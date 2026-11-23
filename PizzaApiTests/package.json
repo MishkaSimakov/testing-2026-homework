@@ -1,0 +1,25 @@
+{
+  "name": "pizza-api-tests",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run typecheck && vitest run",
+    "typecheck": "tsc --noEmit",
+    "test:watch": "vitest",
+    "test:report": "allure run -- npm test",
+    "report:open": "allure open allure-report"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@vitest/runner": "^4.1.11",
+    "allure": "^3.33.0",
+    "allure-js-commons": "^3.15.0",
+    "allure-vitest": "^3.15.0",
+    "typescript": "^7.0.2",
+    "vitest": "^3.2.7"
+  }
+}
