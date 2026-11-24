@@ -1,1 +1,0 @@
-export const baseUrl = process.env.PIZZA_API_URL;

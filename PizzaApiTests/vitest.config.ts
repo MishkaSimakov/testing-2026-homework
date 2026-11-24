@@ -12,7 +12,7 @@ export default defineConfig({
     test: {
         environment: 'node',
         include: ['tests/**/*.test.ts'],
-        setupFiles: ['allure-vitest/setup'],
+        setupFiles: ['allure-vitest/setup', './tests/setup.ts'],
         reporters: [
             'verbose',
             ['allure-vitest/reporter', {resultsDir: 'allure-results'}],
