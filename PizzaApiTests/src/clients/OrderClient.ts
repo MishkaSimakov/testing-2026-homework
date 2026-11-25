@@ -28,11 +28,11 @@ export class OrderClient {
         };
     }
 
-    show() {
+    async show() {
         return this.request('/orders', 200, orderListResponseSchema);
     }
 
-    create(address: OrderAddress, items: OrderItem[]) {
+    async create(address: OrderAddress, items: OrderItem[]) {
         return this.request('/orders', 201, orderResponseSchema, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -40,12 +40,25 @@ export class OrderClient {
         });
     }
 
-
-    updateStatus(orderId: string, newStatus: OrderStatus) {
+    async updateStatus(orderId: string, newStatus: OrderStatus) {
         return this.request(`/orders/${orderId}/status`, 200, orderResponseSchema, {
             method: 'PATCH',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({status: newStatus}),
         });
+    }
+
+    async get(orderId: string) {
+        return this.request(`/orders/${orderId}`, 200, orderResponseSchema);
+    }
+
+    async delete(orderId: string, reason: string): Promise<ApiResult<void>> {
+        const query = new URLSearchParams({reason});
+
+        const response = await fetch(`${this.baseUrl}/orders/${orderId}?${query}`, {
+            method: 'DELETE',
+        });
+
+        return {status: response.status};
     }
 }
