@@ -1,5 +1,5 @@
 import {expect, assert, test} from 'vitest';
-import {advanceCreatedOrderStatus, client, createFakeOrders} from "./helpers";
+import {advanceCreatedOrderStatus, client, createFakeOrders, fakeUUID} from "./helpers";
 import {OrderStatus} from "@/data/OrderStatus";
 
 test('order can be removed', async () => {
@@ -17,10 +17,16 @@ test('order can be removed', async () => {
     }
 });
 
-test('non existing order cant be removed', async () => {
+test('order with malformed uuid cant be removed', async () => {
     const removeResponse = await client().remove("abracadabra", `just for fun`);
 
     expect(removeResponse.status).toBe(400);
+});
+
+test('non existing order cant be removed', async () => {
+    const removeResponse = await client().remove(fakeUUID(), `just for fun`);
+
+    expect(removeResponse.status).toBe(404);
 });
 
 test('OUT_FOR_DELIVERY order cant be removed', async () => {

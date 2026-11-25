@@ -1,5 +1,5 @@
 import {expect, assert, test} from 'vitest';
-import {client, createFakeOrders} from "./helpers";
+import {client, createFakeOrders, fakeUUID} from "./helpers";
 import {OrderStatus} from "@/data/OrderStatus";
 
 test('PATCH /orders/{id}/status changes status correctly', async () => {
@@ -31,14 +31,14 @@ test('PATCH /orders/{id}/status allows to cancel order', async () => {
     expect(orderInfo.body.status).toEqual('CANCELLED');
 });
 
-test('PATCH /orders/{id}/status fails when order doesnt exist', async () => {
+test('PATCH /orders/{id}/status fails when uuid is malformed', async () => {
     const orderInfo = await client().updateStatus('abracadabra', 'PAID');
 
     expect(orderInfo.status).toBe(400);
 });
 
 test('PATCH /orders/{id}/status fails when order doesnt exist', async () => {
-    const orderInfo = await client().updateStatus('abracadabra', 'PAID');
+    const orderInfo = await client().updateStatus(fakeUUID(), 'PAID');
 
-    expect(orderInfo.status).toBe(400);
+    expect(orderInfo.status).toBe(404);
 });

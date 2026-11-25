@@ -10,6 +10,10 @@ export function client() {
     return new OrderClient(process.env.PIZZA_API_URL);
 }
 
+export function fakeUUID() {
+    return "7a03b912-4a72-42ad-b0e4-c189adc5258a";
+}
+
 // Creates @count fake orders and returns array of response bodies for each of them
 export async function createFakeOrders(count: number = 5) {
     const orders: ReturnType<typeof orderResponseSchema.parse>[] = [];
