@@ -26,6 +26,26 @@ test('order can be deleted', async () => {
     }
 });
 
+test('delete works second time when reason matches', async () => {
+    const order = (await createFakeOrders(1))[0]!;
+
+    const deleteResponse1 = await client().delete(order.id, `reason`);
+    expect(deleteResponse1.status).toBe(204);
+
+    const deleteResponse2 = await client().delete(order.id, `reason`);
+    expect(deleteResponse2.status).toBe(204);
+});
+
+test('delete fails second time with when reason is different', async () => {
+    const order = (await createFakeOrders(1))[0]!;
+
+    const deleteResponse1 = await client().delete(order.id, `reason 1`);
+    expect(deleteResponse1.status).toBe(204);
+
+    const deleteResponse2 = await client().delete(order.id, `reason 2`);
+    expect(deleteResponse2.status).toBe(409);
+});
+
 test('order with malformed uuid cant be deleted', async () => {
     const deleteResponse = await client().delete("abracadabra", `just for fun`);
 

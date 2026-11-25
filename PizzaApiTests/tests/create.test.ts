@@ -1,7 +1,6 @@
 import {expect, assert, test} from 'vitest';
 import {client, createFakeOrders} from "./helpers";
 import {makeOrderAddress, makeOrderItem} from "@/factories/order";
-import {OrderStatus} from "@/data/OrderStatus";
 import {OrderAddress} from "@/data/OrderAddress";
 
 
