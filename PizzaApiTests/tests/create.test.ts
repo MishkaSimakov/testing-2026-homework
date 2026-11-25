@@ -81,3 +81,12 @@ test(`POST /orders rejects empty items list`, async () => {
 
     expect(response.status).toBe(400);
 });
+
+test('POST /orders fails when body is incorrect', async () => {
+    const response = await fetch(client().createURL(), {
+        method: 'POST'
+    });
+
+    expect(response.status).not.toBe(200);
+    expect(response.status).not.toBe(500);
+});

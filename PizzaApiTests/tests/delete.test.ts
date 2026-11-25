@@ -87,10 +87,25 @@ test.each([
         label: '1001 characters',
         reason: 'l'.repeat(1001),
     },
+    {
+        label: 'empty',
+        reason: '',
+    },
 ])('error when reason is too long ($label)', async ({reason}) => {
     const orders = await createFakeOrders(1);
 
     const deleteResponse = await client().delete(orders[0]!.id, reason);
 
     expect(deleteResponse.status).toBe(400);
+});
+
+test('delete fails when body is incorrect', async () => {
+    const order = (await createFakeOrders(1))[0]!;
+
+    const response = await fetch(client().deleteURL(order.id), {
+        method: 'DELETE'
+    });
+
+    expect(response.status).not.toBe(200);
+    expect(response.status).not.toBe(500);
 });

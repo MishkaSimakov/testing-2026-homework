@@ -53,7 +53,7 @@ test('PATCH /orders/{id}/status fails for PAID -> OUT_FOR_DELIVERY', async () =>
     const order = (await createFakeOrders(1))[0]!;
 
     await advanceCreatedOrderStatus(order.id, 'PAID');
-    
+
     const orderInfo = await client().updateStatus(order.id, 'OUT_FOR_DELIVERY');
     expect(orderInfo.status).toBe(409);
 });
@@ -68,4 +68,15 @@ test('PATCH /orders/{id}/status fails when order doesnt exist', async () => {
     const orderInfo = await client().updateStatus(fakeUUID(), 'PAID');
 
     expect(orderInfo.status).toBe(404);
+});
+
+test('status change fails when body is incorrect', async () => {
+    const order = (await createFakeOrders(1))[0]!;
+
+    const response = await fetch(client().updateStatusURL(order.id), {
+        method: 'PATCH'
+    });
+
+    expect(response.status).not.toBe(200);
+    expect(response.status).not.toBe(500);
 });

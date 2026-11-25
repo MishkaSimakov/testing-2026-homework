@@ -57,6 +57,13 @@ test('fail to remove when reason is too long', async () => {
     expect(removeResponse.status).toBe(400);
 });
 
+test('fail to remove when reason is empty', async () => {
+    const orders = await createFakeOrders(1);
+
+    const removeResponse = await client().remove(orders[0]!.id, '');
+
+    expect(removeResponse.status).toBe(400);
+});
 
 test('removed orders doesnt show up, not removed remain', async () => {
     const orders = await createFakeOrders(5);
@@ -98,4 +105,15 @@ test('CANCELLED order remove fail when reasons doesnt match', async () => {
     const removeResponse = await client().remove(orders[0]!.id, "a different reason");
 
     expect(removeResponse.status).toBe(409);
+});
+
+test('remove fails when body is incorrect', async () => {
+    const order = (await createFakeOrders(1))[0]!;
+
+    const response = await fetch(client().removeURL(order.id), {
+        method: 'DELETE'
+    });
+
+    expect(response.status).not.toBe(200);
+    expect(response.status).not.toBe(500);
 });
