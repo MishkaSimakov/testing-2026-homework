@@ -67,6 +67,16 @@ export class OrderClient {
         return {status: response.status};
     }
 
+    async remove(orderId: string, reason: string): Promise<ApiResult<void>> {
+        const query = new URLSearchParams({reason});
+
+        const response = await fetch(`${this.baseUrl}/orders/${orderId}/remove?${query}`, {
+            method: 'DELETE',
+        });
+
+        return {status: response.status};
+    }
+
     async createWorkflowOrder(address: OrderAddress, items: OrderItem[]) {
         return this.request(`/seminar/workflow/orders`, 200, workflowStepResponseSchema, {
             method: 'POST',
