@@ -38,3 +38,25 @@ export const orderResponseSchema = orderSummarySchema.extend({
 });
 
 export const orderListResponseSchema = z.array(orderSummarySchema);
+
+export const orderBoardResponseSchema = orderSummarySchema
+    .omit({status: true})
+    .extend({
+        currentStatus: orderStatusSchema,
+        paymentReceived: z.boolean(),
+        cookingStarted: z.boolean(),
+        courierAssigned: z.boolean(),
+        delivered: z.boolean(),
+        nextSuggestedCommand: z.string(),
+    });
+
+export const workflowStepResponseSchema = z.object({
+    orderId: z.uuid(),
+    executedCommand: z.string(),
+    emittedEvent: z.string(),
+    currentStatus: orderStatusSchema,
+    policyName: z.string(),
+    suggestedNextCommand: z.string(),
+    explanation: z.string(),
+    board: orderBoardResponseSchema,
+});

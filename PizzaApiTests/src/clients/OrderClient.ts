@@ -1,6 +1,11 @@
 import {OrderStatus} from "@/data/OrderStatus";
 import {ZodType} from "zod";
-import {orderListResponseSchema, orderResponseSchema} from "@/schemas/order";
+import {
+    orderBoardResponseSchema,
+    orderListResponseSchema,
+    orderResponseSchema,
+    workflowStepResponseSchema,
+} from "@/schemas/order";
 import {OrderAddress} from "@/data/OrderAddress";
 import {OrderItem} from "@/data/OrderItem";
 
@@ -60,5 +65,41 @@ export class OrderClient {
         });
 
         return {status: response.status};
+    }
+
+    async createWorkflowOrder(address: OrderAddress, items: OrderItem[]) {
+        return this.request(`/seminar/workflow/orders`, 200, workflowStepResponseSchema, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({address, items}),
+        });
+    }
+
+    async receivePayment(orderId: string) {
+        return this.request(`/seminar/workflow/orders/${orderId}/payment-received`, 200, workflowStepResponseSchema, {
+            method: 'POST',
+        });
+    }
+
+    async startCooking(orderId: string) {
+        return this.request(`/seminar/workflow/orders/${orderId}/start-cooking`, 200, workflowStepResponseSchema, {
+            method: 'POST',
+        });
+    }
+
+    async assignCourier(orderId: string) {
+        return this.request(`/seminar/workflow/orders/${orderId}/assign-courier`, 200, workflowStepResponseSchema, {
+            method: 'POST',
+        });
+    }
+
+    async deliver(orderId: string) {
+        return this.request(`/seminar/workflow/orders/${orderId}/deliver`, 200, workflowStepResponseSchema, {
+            method: 'POST',
+        });
+    }
+
+    async getBoard(orderId: string) {
+        return this.request(`/seminar/workflow/orders/${orderId}/board`, 200, orderBoardResponseSchema);
     }
 }
