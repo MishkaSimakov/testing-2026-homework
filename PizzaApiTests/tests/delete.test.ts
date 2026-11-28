@@ -1,5 +1,5 @@
-import {expect, assert, test} from 'vitest';
-import {advanceCreatedOrderStatus, client, createFakeOrders, fakeUUID} from "./helpers";
+import {assert, expect, test} from 'vitest';
+import {advanceCreatedOrderStatus, client, createFakeOrder, createFakeOrders, fakeUUID} from "./helpers";
 import {OrderStatus} from "@/data/OrderStatus";
 
 test('order can be deleted', async () => {
@@ -27,7 +27,7 @@ test('order can be deleted', async () => {
 });
 
 test('delete works second time when reason matches', async () => {
-    const order = (await createFakeOrders(1))[0]!;
+    const order = await createFakeOrder();
 
     const deleteResponse1 = await client().delete(order.id, `reason`);
     expect(deleteResponse1.status).toBe(204);
@@ -37,7 +37,7 @@ test('delete works second time when reason matches', async () => {
 });
 
 test('delete fails second time with when reason is different', async () => {
-    const order = (await createFakeOrders(1))[0]!;
+    const order = await createFakeOrder();
 
     const deleteResponse1 = await client().delete(order.id, `reason 1`);
     expect(deleteResponse1.status).toBe(204);
@@ -59,21 +59,21 @@ test('non existing order cant be deleted', async () => {
 });
 
 test('OUT_FOR_DELIVERY order cant be deleted', async () => {
-    const orders = await createFakeOrders(1);
+    const order = await createFakeOrder();
 
-    await advanceCreatedOrderStatus(orders[0]!.id, 'OUT_FOR_DELIVERY');
+    await advanceCreatedOrderStatus(order.id, 'OUT_FOR_DELIVERY');
 
-    const deleteResponse = await client().delete(orders[0]!.id, `just for fun`);
+    const deleteResponse = await client().delete(order.id, `just for fun`);
 
     expect(deleteResponse.status).toBe(409);
 });
 
 test('DELIVERED order cant be deleted', async () => {
-    const orders = await createFakeOrders(1);
+    const order = await createFakeOrder();
 
-    await advanceCreatedOrderStatus(orders[0]!.id, 'DELIVERED');
+    await advanceCreatedOrderStatus(order.id, 'DELIVERED');
 
-    const deleteResponse = await client().delete(orders[0]!.id, `just for fun`);
+    const deleteResponse = await client().delete(order.id, `just for fun`);
 
     expect(deleteResponse.status).toBe(409);
 });
@@ -92,15 +92,15 @@ test.each([
         reason: '',
     },
 ])('error when reason is too long ($label)', async ({reason}) => {
-    const orders = await createFakeOrders(1);
+    const order = await createFakeOrder();
 
-    const deleteResponse = await client().delete(orders[0]!.id, reason);
+    const deleteResponse = await client().delete(order.id, reason);
 
     expect(deleteResponse.status).toBe(400);
 });
 
 test('delete fails when body is incorrect', async () => {
-    const order = (await createFakeOrders(1))[0]!;
+    const order = await createFakeOrder();
 
     const response = await fetch(client().deleteURL(order.id), {
         method: 'DELETE'

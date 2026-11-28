@@ -1,5 +1,5 @@
-import {expect, assert, test} from 'vitest';
-import {advanceCreatedOrderStatus, client, createFakeOrders, fakeUUID} from "./helpers";
+import {assert, expect, test} from 'vitest';
+import {advanceCreatedOrderStatus, client, createFakeOrder, createFakeOrders, fakeUUID} from "./helpers";
 import {OrderStatus} from "@/data/OrderStatus";
 
 test('order can be removed', async () => {
@@ -30,37 +30,37 @@ test('non existing order cant be removed', async () => {
 });
 
 test('OUT_FOR_DELIVERY order cant be removed', async () => {
-    const orders = await createFakeOrders(1);
+    const order = await createFakeOrder();
 
-    await advanceCreatedOrderStatus(orders[0]!.id, 'OUT_FOR_DELIVERY');
+    await advanceCreatedOrderStatus(order.id, 'OUT_FOR_DELIVERY');
 
-    const removeResponse = await client().remove(orders[0]!.id, `just for fun`);
+    const removeResponse = await client().remove(order.id, `just for fun`);
 
     expect(removeResponse.status).toBe(409);
 });
 
 test('DELIVERED order cant be removed', async () => {
-    const orders = await createFakeOrders(1);
+    const order = await createFakeOrder();
 
-    await advanceCreatedOrderStatus(orders[0]!.id, 'DELIVERED');
+    await advanceCreatedOrderStatus(order.id, 'DELIVERED');
 
-    const removeResponse = await client().remove(orders[0]!.id, `just for fun`);
+    const removeResponse = await client().remove(order.id, `just for fun`);
 
     expect(removeResponse.status).toBe(409);
 });
 
 test('fail to remove when reason is too long', async () => {
-    const orders = await createFakeOrders(1);
+    const order = await createFakeOrder();
 
-    const removeResponse = await client().remove(orders[0]!.id, 'l'.repeat(1001));
+    const removeResponse = await client().remove(order.id, 'l'.repeat(1001));
 
     expect(removeResponse.status).toBe(400);
 });
 
 test('fail to remove when reason is empty', async () => {
-    const orders = await createFakeOrders(1);
+    const order = await createFakeOrder();
 
-    const removeResponse = await client().remove(orders[0]!.id, '');
+    const removeResponse = await client().remove(order.id, '');
 
     expect(removeResponse.status).toBe(400);
 });
@@ -86,29 +86,29 @@ test('removed orders doesnt show up, not removed remain', async () => {
 });
 
 test('CANCELLED order can be removed when reasons match', async () => {
-    const orders = await createFakeOrders(1);
+    const order = await createFakeOrder();
     const reason = "employees ate all ingredients, can't cook now :(";
 
-    await client().delete(orders[0]!.id, reason);
+    await client().delete(order.id, reason);
 
-    const removeResponse = await client().remove(orders[0]!.id, reason);
+    const removeResponse = await client().remove(order.id, reason);
 
     expect(removeResponse.status).toBe(204);
 });
 
 test('CANCELLED order remove fail when reasons doesnt match', async () => {
-    const orders = await createFakeOrders(1);
+    const order = await createFakeOrder();
     const reason = "employees ate all ingredients, can't cook now :(";
 
-    await client().delete(orders[0]!.id, reason);
+    await client().delete(order.id, reason);
 
-    const removeResponse = await client().remove(orders[0]!.id, "a different reason");
+    const removeResponse = await client().remove(order.id, "a different reason");
 
     expect(removeResponse.status).toBe(409);
 });
 
 test('remove fails when body is incorrect', async () => {
-    const order = (await createFakeOrders(1))[0]!;
+    const order = await createFakeOrder();
 
     const response = await fetch(client().removeURL(order.id), {
         method: 'DELETE'

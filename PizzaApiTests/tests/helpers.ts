@@ -1,6 +1,6 @@
 import {OrderClient} from "@/clients/OrderClient";
 import {makeOrderAddress, makeOrderItem} from "@/factories/order";
-import {expect, assert} from "vitest";
+import {assert, expect} from "vitest";
 import {orderResponseSchema} from "@/schemas/order";
 import {OrderStatus} from "@/data/OrderStatus";
 
@@ -14,22 +14,53 @@ export function fakeUUID() {
     return "7a03b912-4a72-42ad-b0e4-c189adc5258a";
 }
 
-// Creates @count fake orders and returns array of response bodies for each of them
+// Creates one fake order through API, checks that status is 201, and returns the newly created order
+export async function createFakeOrder() {
+    const order = {
+        address: makeOrderAddress(),
+        items: [makeOrderItem()],
+    };
+
+    const response = await client().create(order.address, order.items);
+
+    expect(response.status).toBe(201);
+    assert(response.body);
+
+    return response.body;
+}
+
+// Same as createFakeOrder, but creates @count fake orders
 export async function createFakeOrders(count: number = 5) {
     const orders: ReturnType<typeof orderResponseSchema.parse>[] = [];
 
-    for (let i = 0; i < 5; ++i) {
-        const order = {
-            address: makeOrderAddress(),
-            items: [makeOrderItem()],
-        };
+    for (let i = 0; i < count; ++i) {
+        orders.push(await createFakeOrder());
+    }
 
-        const response = await client().create(order.address, order.items);
+    return orders;
+}
 
-        expect(response.status).toBe(201);
-        assert(response.body);
+// Creates one fake order through workflow API, checks that status is 201, and returns the newly created order
+export async function createFakeWorkflowOrder() {
+    const order = {
+        address: makeOrderAddress(),
+        items: [makeOrderItem()],
+    };
 
-        orders.push(response.body);
+    const response = await client().createWorkflowOrder(order.address, order.items);
+
+    expect(response.status).toBe(200);
+    assert(response.body);
+
+    return response.body;
+}
+
+// Same as createFakeWorkflowOrder, but creates @count fake orders
+export async function createFakeWorkflowOrders(count: number = 5) {
+    const orders: ReturnType<typeof orderResponseSchema.parse>[] = [];
+
+    for (let i = 0; i < count; ++i) {
+        orders.push(await createFakeOrder());
     }
 
     return orders;

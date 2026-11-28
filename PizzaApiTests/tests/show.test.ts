@@ -1,4 +1,4 @@
-import {expect, assert, test} from 'vitest';
+import {assert, expect, test} from 'vitest';
 import {client, createFakeOrders} from "./helpers";
 
 test('GET /orders is empty when no orders were created', async () => {

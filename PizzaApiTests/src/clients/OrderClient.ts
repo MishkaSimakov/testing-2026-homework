@@ -15,24 +15,6 @@ export class OrderClient {
     constructor(readonly baseUrl: string) {
     }
 
-    private async request<T>(
-        path: string,
-        expectedStatus: number,
-        schema: ZodType<T>,
-        init?: RequestInit,
-    ): Promise<ApiResult<T>> {
-        const response = await fetch(path, init);
-
-        if (response.status !== expectedStatus) {
-            return {status: response.status};
-        }
-
-        return {
-            status: response.status,
-            body: schema.parse(await response.json())
-        };
-    }
-
     showURL() {
         return `${this.baseUrl}/orders`;
     }
@@ -159,5 +141,23 @@ export class OrderClient {
 
     async getBoard(orderId: string) {
         return this.request(this.getBoardURL(orderId), 200, orderBoardResponseSchema);
+    }
+
+    private async request<T>(
+        path: string,
+        expectedStatus: number,
+        schema: ZodType<T>,
+        init?: RequestInit,
+    ): Promise<ApiResult<T>> {
+        const response = await fetch(path, init);
+
+        if (response.status !== expectedStatus) {
+            return {status: response.status};
+        }
+
+        return {
+            status: response.status,
+            body: schema.parse(await response.json())
+        };
     }
 }

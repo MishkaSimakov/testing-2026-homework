@@ -1,10 +1,9 @@
-import {expect, assert, test} from 'vitest';
-import {client, createFakeOrders, fakeUUID} from "./helpers";
+import {assert, expect, test} from 'vitest';
+import {client, createFakeWorkflowOrder, fakeUUID} from "./helpers";
 import {makeOrderAddress, makeOrderItem} from "@/factories/order";
 
 test('workflow order can be delivered', async () => {
-    const orderClient = client();
-    const createResponse = await orderClient.createWorkflowOrder(makeOrderAddress(), [makeOrderItem()]);
+    const createResponse = await client().createWorkflowOrder(makeOrderAddress(), [makeOrderItem()]);
 
     expect(createResponse.status).toBe(200);
     assert(createResponse.body);
@@ -18,25 +17,25 @@ test('workflow order can be delivered', async () => {
 
     const steps = [
         {
-            run: () => orderClient.receivePayment(orderId),
+            run: () => client().receivePayment(orderId),
             status: 'PAID',
             event: 'PaymentReceived',
             nextCommand: 'StartCooking',
         },
         {
-            run: () => orderClient.startCooking(orderId),
+            run: () => client().startCooking(orderId),
             status: 'COOKING',
             event: 'CookingStarted',
             nextCommand: 'AssignCourier',
         },
         {
-            run: () => orderClient.assignCourier(orderId),
+            run: () => client().assignCourier(orderId),
             status: 'OUT_FOR_DELIVERY',
             event: 'CourierAssigned',
             nextCommand: 'DeliverOrder',
         },
         {
-            run: () => orderClient.deliver(orderId),
+            run: () => client().deliver(orderId),
             status: 'DELIVERED',
             event: 'OrderDelivered',
             nextCommand: 'None',
@@ -57,7 +56,7 @@ test('workflow order can be delivered', async () => {
         });
     }
 
-    const boardResponse = await orderClient.getBoard(orderId);
+    const boardResponse = await client().getBoard(orderId);
 
     expect(boardResponse.status).toBe(200);
     assert(boardResponse.body);
@@ -73,21 +72,30 @@ test('workflow order can be delivered', async () => {
     });
 });
 
+test('workflow doesnt allow to skip steps', async () => {
+    const order = await createFakeWorkflowOrder();
+
+    const response = await client().startCooking(order.orderId);
+
+    expect(response.status).not.toBe(200);
+    expect(response.status).not.toBe(500);
+});
+
 test('workflow board shows cancelled order', async () => {
-    const order = (await createFakeOrders(1))[0]!;
-    const paymentResponse = await client().receivePayment(order.id);
+    const order = await createFakeWorkflowOrder();
+    const paymentResponse = await client().receivePayment(order.orderId);
     expect(paymentResponse.status).toBe(200);
 
-    const deleteResponse = await client().delete(order.id, 'cancelled');
+    const deleteResponse = await client().delete(order.orderId, 'cancelled');
     expect(deleteResponse.status).toBe(204);
 
-    const boardResponse = await client().getBoard(order.id);
+    const boardResponse = await client().getBoard(order.orderId);
 
     expect(boardResponse.status).toBe(200);
     assert(boardResponse.body);
 
     expect(boardResponse.body).toMatchObject({
-        id: order.id,
+        id: order.orderId,
         currentStatus: 'CANCELLED',
         paymentReceived: false,
         cookingStarted: false,

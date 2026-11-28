@@ -1,5 +1,5 @@
-import {expect, assert, test} from 'vitest';
-import {advanceCreatedOrderStatus, client, createFakeOrders, fakeUUID} from "./helpers";
+import {assert, expect, test} from 'vitest';
+import {advanceCreatedOrderStatus, client, createFakeOrder, createFakeOrders, fakeUUID} from "./helpers";
 import {OrderStatus} from "@/data/OrderStatus";
 
 test('PATCH /orders/{id}/status changes status correctly', async () => {
@@ -19,38 +19,38 @@ test('PATCH /orders/{id}/status changes status correctly', async () => {
 });
 
 test('PATCH /orders/{id}/status allows to cancel order', async () => {
-    const orders = await createFakeOrders(1);
-    expect(orders[0]!.status).toBe('CREATED');
+    const order = await createFakeOrder();
+    expect(order.status).toBe('CREATED');
 
-    const orderInfo = await client().updateStatus(orders[0]!.id, 'CANCELLED');
+    const orderInfo = await client().updateStatus(order.id, 'CANCELLED');
 
     expect(orderInfo.status).toBe(200);
     assert(orderInfo.body);
 
-    expect(orderInfo.body.id).toEqual(orders[0]!.id);
+    expect(orderInfo.body.id).toEqual(order.id);
     expect(orderInfo.body.status).toEqual('CANCELLED');
 });
 
 test('PATCH /orders/{id}/status fails to cancel already CANCELLED', async () => {
-    const orders = await createFakeOrders(1);
-    expect(orders[0]!.status).toBe('CREATED');
+    const order = await createFakeOrder();
+    expect(order.status).toBe('CREATED');
 
-    const orderInfo = await client().updateStatus(orders[0]!.id, 'CANCELLED');
+    const orderInfo = await client().updateStatus(order.id, 'CANCELLED');
     expect(orderInfo.status).toBe(200);
 
-    const orderInfo2 = await client().updateStatus(orders[0]!.id, 'CANCELLED');
+    const orderInfo2 = await client().updateStatus(order.id, 'CANCELLED');
     expect(orderInfo2.status).toBe(409);
 });
 
 test('PATCH /orders/{id}/status fails for CREATED -> DELIVERED', async () => {
-    const order = (await createFakeOrders(1))[0]!;
+    const order = await createFakeOrder();
 
     const orderInfo = await client().updateStatus(order.id, 'DELIVERED');
     expect(orderInfo.status).toBe(409);
 });
 
 test('PATCH /orders/{id}/status fails for PAID -> OUT_FOR_DELIVERY', async () => {
-    const order = (await createFakeOrders(1))[0]!;
+    const order = await createFakeOrder();
 
     await advanceCreatedOrderStatus(order.id, 'PAID');
 
@@ -71,7 +71,7 @@ test('PATCH /orders/{id}/status fails when order doesnt exist', async () => {
 });
 
 test('status change fails when body is incorrect', async () => {
-    const order = (await createFakeOrders(1))[0]!;
+    const order = await createFakeOrder();
 
     const response = await fetch(client().updateStatusURL(order.id), {
         method: 'PATCH'

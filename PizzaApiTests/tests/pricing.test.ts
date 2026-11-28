@@ -1,4 +1,4 @@
-import {expect, assert, test} from 'vitest';
+import {assert, expect, test} from 'vitest';
 import {client} from "./helpers";
 import {makeOrderAddress, makeOrderItem} from "@/factories/order";
 import type {OrderItem} from "@/data/OrderItem";
