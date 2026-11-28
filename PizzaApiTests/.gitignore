@@ -1,0 +1,7 @@
+node_modules/
+.vitest/
+allure-results/
+allure-report/
+coverage/
+.env
+.idea

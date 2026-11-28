@@ -1,0 +1,4 @@
+.vitest/
+allure-results/
+allure-report/
+coverage/
