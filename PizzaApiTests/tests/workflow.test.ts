@@ -81,6 +81,24 @@ test('workflow doesnt allow to skip steps', async () => {
     expect(response.status).not.toBe(500);
 });
 
+test.each(['assignCourier', 'deliver'] as const)(
+    'workflow %s fails and leaves a newly created order unchanged',
+    async (stage) => {
+        const order = await createFakeWorkflowOrder();
+
+        const boardResponseBefore = await client().getBoard(order.orderId);
+
+        const response = await client()[stage](order.orderId);
+        expect(response.status).not.toBe(200);
+        expect(response.status).not.toBe(500);
+
+        const boardResponseAfter = await client().getBoard(order.orderId);
+
+        expect(boardResponseAfter.status).toBe(200);
+        expect(boardResponseAfter.body).toMatchObject(boardResponseBefore);
+    },
+);
+
 test('workflow board shows cancelled order', async () => {
     const order = await createFakeWorkflowOrder();
     const paymentResponse = await client().receivePayment(order.orderId);
@@ -122,6 +140,15 @@ test('workflow payment fails when order doesnt exist', async () => {
 
     expect(response.status).toBe(404);
 });
+
+test.each(['startCooking', 'assignCourier', 'deliver'] as const)(
+    'workflow %s returns 404 when the order does not exist',
+    async (command) => {
+        const response = await client()[command](fakeUUID());
+
+        expect(response.status).toBe(404);
+    },
+);
 
 test('workflow board fails when order doesnt exist', async () => {
     const response = await client().getBoard(fakeUUID());

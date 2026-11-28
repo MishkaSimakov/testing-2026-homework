@@ -70,6 +70,23 @@ test('PATCH /orders/{id}/status fails when order doesnt exist', async () => {
     expect(orderInfo.status).toBe(404);
 });
 
+test.each([
+    {label: 'missing status', body: {}},
+    {label: 'blank status', body: {status: ''}},
+    {label: 'unknown status', body: {status: 'UNKNOWN'}},
+])('PATCH /orders/{id}/status rejects $label', async ({body}) => {
+    const order = await createFakeOrder();
+
+    const response = await fetch(client().updateStatusURL(order.id), {
+        method: 'PATCH',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(body),
+    });
+
+    expect(response.status).not.toBe(200);
+    expect(response.status).not.toBe(500);
+});
+
 test('status change fails when body is incorrect', async () => {
     const order = await createFakeOrder();
 
