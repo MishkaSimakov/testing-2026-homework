@@ -1,0 +1,23 @@
+{
+    "name": "web-tests",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "engines": {
+        "node": ">=22.18.0"
+    },
+    "scripts": {
+        "test": "npm run typecheck && playwright test",
+        "typecheck": "tsc --noEmit",
+        "test:ui": "playwright test --ui",
+        "test:report": "allure run -- npm test",
+        "report:open": "allure open allure-report"
+    },
+    "devDependencies": {
+        "@playwright/test": "^1.65.1",
+        "@types/node": "^22.20.7",
+        "allure": "^3.33.0",
+        "allure-playwright": "^3.15.0",
+        "typescript": "^7.0.2"
+    }
+}

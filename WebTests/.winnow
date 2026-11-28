@@ -1,0 +1,13 @@
+# Node.js dependencies and framework caches
+node_modules/
+.next/
+.nuxt/
+.turbo/
+.parcel-cache/
+.svelte-kit/
+
+# Allure reports and Playwright failure artifacts
+allure-results/
+allure-report/
+playwright-report/
+test-results/
