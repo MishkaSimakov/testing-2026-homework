@@ -87,15 +87,17 @@ test.each(['assignCourier', 'deliver'] as const)(
         const order = await createFakeWorkflowOrder();
 
         const boardResponseBefore = await client().getBoard(order.orderId);
+        assert(boardResponseBefore.body);
 
         const response = await client()[stage](order.orderId);
         expect(response.status).not.toBe(200);
         expect(response.status).not.toBe(500);
 
         const boardResponseAfter = await client().getBoard(order.orderId);
+        assert(boardResponseAfter.body);
 
         expect(boardResponseAfter.status).toBe(200);
-        expect(boardResponseAfter.body).toMatchObject(boardResponseBefore);
+        expect(boardResponseAfter.body).toMatchObject(boardResponseBefore.body);
     },
 );
 

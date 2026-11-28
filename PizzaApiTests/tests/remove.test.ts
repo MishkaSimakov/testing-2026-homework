@@ -1,21 +1,17 @@
 import {assert, expect, test} from 'vitest';
 import {advanceCreatedOrderStatus, client, createFakeOrder, createFakeOrders, fakeUUID} from "./helpers";
-import {OrderStatus} from "@/data/OrderStatus";
 
-test('order can be removed', async () => {
-    const orders = await createFakeOrders(5);
+test.each(['CREATED', 'PAID', 'COOKING'] as const)('%s order can be removed', async (status) => {
+        const order = await createFakeOrder();
+        await advanceCreatedOrderStatus(order.id, status);
 
-    const validDeleteStatuses: OrderStatus[] = ['CREATED', 'PAID', 'COOKING'];
-
-    for (let i = 0; i < validDeleteStatuses.length; ++i) {
-        expect(orders[i]!.status).toBe('CREATED');
-
-        await advanceCreatedOrderStatus(orders[i]!.id, validDeleteStatuses[i]!);
-
-        const removeResponse = await client().remove(orders[i]!.id, `just for fun ${i}`);
+        const removeResponse = await client().remove(order.id, 'removed');
         expect(removeResponse.status).toBe(204);
-    }
-});
+
+        const orderResponse = await client().get(order.id);
+        expect(orderResponse.status).toBe(404);
+    },
+);
 
 test('order with malformed uuid cant be removed', async () => {
     const removeResponse = await client().remove("abracadabra", `just for fun`);

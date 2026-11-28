@@ -1,30 +1,21 @@
 import {assert, expect, test} from 'vitest';
-import {advanceCreatedOrderStatus, client, createFakeOrder, createFakeOrders, fakeUUID} from "./helpers";
-import {OrderStatus} from "@/data/OrderStatus";
+import {advanceCreatedOrderStatus, client, createFakeOrder, fakeUUID} from "./helpers";
 
-test('order can be deleted', async () => {
-    const orders = await createFakeOrders(5);
+test.each(['CREATED', 'PAID', 'COOKING'] as const)('%s order can be cancelled', async (status) => {
+        const order = await createFakeOrder();
+        await advanceCreatedOrderStatus(order.id, status);
 
-    const validDeleteStatuses: OrderStatus[] = ['CREATED', 'PAID', 'COOKING'];
+        const cancelResponse = await client().delete(order.id, 'just for fun');
+        expect(cancelResponse.status).toBe(204);
 
-    for (let i = 0; i < validDeleteStatuses.length; ++i) {
-        expect(orders[i]!.status).toBe('CREATED');
-
-        await advanceCreatedOrderStatus(orders[i]!.id, validDeleteStatuses[i]!);
-
-        // delete order
-        const deleteResponse = await client().delete(orders[i]!.id, `just for fun ${i}`);
-        expect(deleteResponse.status).toBe(204);
-
-        // check that status is CANCELLED
-        const orderResponse = await client().get(orders[i]!.id);
+        const orderResponse = await client().get(order.id);
         expect(orderResponse.status).toBe(200);
         assert(orderResponse.body);
 
         expect(orderResponse.body.status).toEqual("CANCELLED");
-        expect(orderResponse.body.cancellationReason).toEqual(`just for fun ${i}`);
-    }
-});
+        expect(orderResponse.body.cancellationReason).toEqual(`just for fun`);
+    },
+);
 
 test('delete works second time when reason matches', async () => {
     const order = await createFakeOrder();
