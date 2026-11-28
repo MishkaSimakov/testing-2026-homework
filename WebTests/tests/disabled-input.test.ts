@@ -1,14 +1,27 @@
 import {expect, test} from '@playwright/test';
 import {DisabledInputPage} from "@/disabled-input/DisabledInputPage";
 
-test('initially input is disabled', async ({page}) => {
+test('initially input is enabled', async ({page}) => {
     const app = new DisabledInputPage(page);
     await app.open();
 
-    expect(await app.input.isDisabled()).toBe(true);
+    await expect(app.input).toBeEnabled();
 });
 
-test('button click doesnt immediately enable button', async ({page}) => {
+test('status reflects input changes', async ({page}) => {
+    const app = new DisabledInputPage(page);
+    await app.open();
+
+    const text = "hello world 123!";
+
+    // input text and remove focus
+    await app.input.fill(text);
+    await app.input.blur();
+
+    await expect(app.status).toContainText(text);
+});
+
+test('button click doesnt immediately enable input', async ({page}) => {
     const app = new DisabledInputPage(page);
     await app.open();
 
@@ -32,14 +45,7 @@ test('button click eventually enables input', async ({page}) => {
 
     await app.waitUntilInputEnabled();
 
-    // input is enabled
     await expect(app.input).toBeEnabled();
-
-    // text is properly displayed
-    const text = "Hello world!";
-
-    await app.input.fill(text);
-    await expect(app.input).toContainText(text);
 });
 
 test('status is updated when input becomes enabled', async ({page}) => {
