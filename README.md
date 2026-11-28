@@ -3,3 +3,4 @@
 - [ДЗ 1](hw1.md)
 - [ДЗ 2](hw2.md)
 - [ДЗ 3](hw3.md)
+- ДЗ 4: [PizzaApiTests/README.md](PizzaApiTests/README.md)
